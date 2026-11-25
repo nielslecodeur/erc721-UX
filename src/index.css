@@ -1,0 +1,169 @@
+@import "@fontsource-variable/manrope";
+
+:root {
+  font-family: "Manrope Variable", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --paper: #f7f8f4;
+  --surface: #fff;
+  --ink: #202d28;
+  --muted: #627069;
+  --line: #dce3db;
+  --green: #185941;
+  --green-hover: #104830;
+  --soft: #e8f0e8;
+  --mint: #d7edbe;
+  --error: #a82e29;
+  --error-bg: #fdf0ee;
+  --nav-active: #e8eee4;
+  color: var(--ink);
+  background: var(--paper);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --paper: #151d19;
+  --surface: #1d2821;
+  --ink: #edf2e9;
+  --muted: #afbdaf;
+  --line: #38463a;
+  --green: #b6dfad;
+  --green-hover: #c9edc3;
+  --soft: #273a2d;
+  --mint: #32482d;
+  --error: #ffb3aa;
+  --error-bg: #382420;
+  --nav-active: #2b3c2e;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+button {
+  cursor: pointer;
+  color: inherit;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+p {
+  line-height: 1.7;
+  max-width: 72ch;
+  margin: 0 0 16px;
+}
+h1,
+h2,
+h3 {
+  margin: 0;
+  text-wrap: balance;
+}
+h1 {
+  font-size: clamp(30px, 3vw, 42px);
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+h2 {
+  font-size: 20px;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+h3 {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700;
+}
+::selection {
+  background: var(--mint);
+  color: var(--ink);
+}
+:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 4px;
+}
+input,
+select,
+textarea {
+  caret-color: var(--green);
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 14px;
+}
+input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+input[type="checkbox"] {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  accent-color: var(--green);
+  flex-shrink: 0;
+}
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  margin: 0 0 8px;
+}
+form .button {
+  margin-top: 16px;
+}
+code,
+pre,
+.address-full {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+code {
+  font-size: 0.88em;
+}
+pre {
+  overflow: auto;
+  border-radius: 8px;
+  background: var(--soft);
+  padding: 20px;
+  line-height: 1.8;
+  font-size: 13px;
+}
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 5px;
+}
+button svg,
+a svg {
+  flex-shrink: 0;
+}
+main:focus {
+  outline: none;
+}
