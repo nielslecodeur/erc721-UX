@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { formatEther, getAddress, isAddress } from "viem";
+import {
+  encodeAbiParameters,
+  formatEther,
+  getAddress,
+  isAddress,
+  keccak256,
+  recoverMessageAddress,
+} from "viem";
 import type { Address, Hex } from "viem";
 import { useAsync } from "../hooks/useAsync";
 import { useProgress } from "../hooks/useProgress";
@@ -96,10 +103,6 @@ export function Collection({ kind }: { kind: "bayc" | "nefturians" }) {
       </PageTitle>
       <WriteHint />
       <section className={`collection-workspace panel ${kind}`}>
-        <div className="collection-letter" aria-hidden="true">
-          {isBayc ? "B" : "N"}
-          <span>ERC721</span>
-        </div>
         <div className="collection-main">
           <h2>{state.data?.collectionName || name}</h2>
           <ContractLink address={address} />
@@ -130,14 +133,20 @@ export function Collection({ kind }: { kind: "bayc" | "nefturians" }) {
                 address,
                 abi: nftAbi,
                 functionName: isBayc ? "claimAToken" : "buyAToken",
-                value: state.data?.price,
+                value: isBayc
+                  ? 0n
+                  : () =>
+                      publicClient.readContract({
+                        address,
+                        abi: nftAbi,
+                        functionName: "tokenPrice",
+                      }),
               })
             }
           >
             {isBayc
               ? "Réclamer un NFT"
               : `Acheter${state.data ? ` · ${formatEther(state.data.price)} ETH` : ""}`}
-            <Icon name="arrow" size={18} />
           </button>
           <p className="muted">
             {isBayc
@@ -214,7 +223,6 @@ export function Collection({ kind }: { kind: "bayc" | "nefturians" }) {
             />
             <button className="button secondary" type="submit">
               Ouvrir la galerie
-              <Icon name="arrow" size={16} />
             </button>
           </form>
         </section>
@@ -237,7 +245,6 @@ export function Collection({ kind }: { kind: "bayc" | "nefturians" }) {
               />
               <button className="button secondary" type="submit">
                 Consulter le NFT
-                <Icon name="arrow" size={16} />
               </button>
             </form>
           </section>
@@ -287,7 +294,6 @@ function GalleryTile({
         ) : (
           <p>{state.data?.name || "NFT sur Sepolia"}</p>
         )}
-        <Icon name="arrow" size={18} />
       </div>
     </>
   );
@@ -579,6 +585,29 @@ export function Meebits() {
   const selected = state.data?.available.find(
     (entry) => String(entry.tokenNumber) === selection,
   );
+  const signatureState = useAsync(
+    async () => {
+      if (!selected) return null;
+      const hash = keccak256(
+        encodeAbiParameters(
+          [{ type: "address" }, { type: "uint256" }],
+          [addresses.meebits, BigInt(selected.tokenNumber)],
+        ),
+      );
+      const signer = await recoverMessageAddress({
+        message: { raw: hash },
+        signature: selected.signature as Hex,
+      });
+      const authorized = await publicClient.readContract({
+        address: addresses.claimer,
+        abi: claimerAbi,
+        functionName: "whitelist",
+        args: [signer],
+      });
+      return { signer, authorized };
+    },
+    `${selected?.signature || ""}:${tx.revision}`,
+  );
   const held = progress.data?.balances[2] ?? 0n;
   const done = Boolean(progress.data?.progress[3]);
   return (
@@ -601,7 +630,10 @@ export function Meebits() {
           </div>
           <button
             className="button small secondary"
-            onClick={state.reload}
+            onClick={() => {
+              state.reload();
+              signatureState.reload();
+            }}
             disabled={state.loading}
           >
             Actualiser
@@ -653,7 +685,13 @@ export function Meebits() {
                 />
                 <button
                   className="button"
-                  disabled={!address || !selected || tx.busy}
+                  disabled={
+                    !address ||
+                    !selected ||
+                    tx.busy ||
+                    signatureState.loading ||
+                    !signatureState.data?.authorized
+                  }
                   onClick={() => {
                     if (selected)
                       void tx.execute({
@@ -670,8 +708,22 @@ export function Meebits() {
                   }}
                 >
                   Réclamer le Meebit
-                  <Icon name="arrow" size={18} />
                 </button>
+                {selected && signatureState.loading && (
+                  <Loading label="Vérification de la signature…" />
+                )}
+                {signatureState.error && (
+                  <Retry
+                    error={signatureState.error}
+                    retry={signatureState.reload}
+                  />
+                )}
+                {signatureState.data && !signatureState.data.authorized && (
+                  <Notice tone="error">
+                    Cette signature n’est pas autorisée par le contrat. Choisis
+                    un autre identifiant ou consulte le professeur.
+                  </Notice>
+                )}
                 <p className="muted">
                   La signature vient du fichier du TD. Tu signes uniquement la
                   transaction de mint dans ton wallet. Pas de pourboire envoyé.

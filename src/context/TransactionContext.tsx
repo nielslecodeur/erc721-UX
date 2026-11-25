@@ -12,7 +12,7 @@ interface Action {
   abi: Abi;
   functionName: string;
   args?: readonly unknown[];
-  value?: bigint;
+  value?: bigint | (() => Promise<bigint>);
 }
 export interface Transaction {
   id: number;
@@ -70,12 +70,16 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
           );
       };
       await assertWallet();
+      const value =
+        typeof action.value === "function"
+          ? await action.value()
+          : action.value;
       const { request } = await publicClient.simulateContract({
         address: action.address,
         abi: action.abi,
         functionName: action.functionName,
         args: action.args,
-        value: action.value,
+        value,
         account: address,
       });
       await assertWallet();

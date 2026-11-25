@@ -64,7 +64,11 @@ Redemarrer Vite apres modification. `.env.local` reste hors de Git ; les variabl
 
 Utiliser le meme wallet sur Sepolia pour tout le TD. S'inscrire sur `/`, puis pour chaque collection effectuer le mint ou l'achat, attendre sa confirmation et cliquer **Valider**. Le prix d'achat et les frais se paient en ETH de test Sepolia.
 
-Les quatre validations automatiques valent **8 points** au total. Les autres points sont attribues par le professeur apres examen du depot. La checklist locale ne distribue pas de points.
+Les quatre validations automatiques valent **8 points** au total. Les autres points sont attribues par le professeur apres examen du depot.
+
+L'accueil regroupe la connexion et les validations : si le wallet detient deja le NFT et est inscrit, la validation est directement disponible depuis la progression. Le menu en haut donne acces aux collections et a la configuration.
+
+Le prix des FakeNefturians est relu juste avant la simulation d'achat. Pour FakeMeebits, la signature selectionnee est verifiee contre la liste des signataires autorises ; un mint non autorise est bloque avant l'ouverture du wallet.
 
 ## Verification
 

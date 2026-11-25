@@ -44,13 +44,15 @@ Les variables `VITE_` sont publiques dans le JavaScript du navigateur. Restreind
 
 Chaque action ouvre sa propre demande dans le wallet. Un mint et sa validation sont deux transactions distinctes. La dApp simule l’appel avant l’envoi, vérifie le compte et le réseau, attend le reçu et contrôle son statut. Un reçu échoué, une annulation ou un remplacement par une autre transaction ne sont pas présentés comme une réussite. En cas de délai de confirmation dépassé, vérifier le lien Etherscan avant de réessayer.
 
-La checklist de rendu est personnelle et stockée dans le navigateur. Cocher une case **n’attribue pas de points**. Les tests utilisent un wallet et des RPC simulés ; ils ne signent aucune transaction réelle.
+L’accueil se limite à la connexion et à la progression. Les validations des collections y sont accessibles directement lorsqu’un NFT est détenu. La checklist locale a été retirée pour alléger l’interface ; les consignes de rendu restent dans Configuration. Les tests utilisent un wallet et des RPC simulés ; ils ne signent aucune transaction réelle.
+
+Avant l’achat d’un FakeNefturian, le prix est relu depuis le contrat. Avant un claim Meebits, la signature sélectionnée est récupérée cryptographiquement puis son signataire est vérifié dans `whitelist`. Une signature non autorisée désactive le mint avec un message explicite.
 
 ## Couverture des exigences
 
 | Exigence du TD                    | Implémentation / route                                                                                                                                |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dépôt Git, clé RPC et frontend    | Git initialisé localement ; React/Vite ; `.env.example`. Créer le dépôt distant et partager son lien au professeur.                                   |
+| Dépôt Git, clé RPC et frontend    | Dépôt `nielslecodeur/erc721-UX` ; React/Vite ; `.env.example`. Partager le lien au professeur.                                                        |
 | Inscription `submitExercise()`    | `/` — inscription, progression et solde ERC20 réels                                                                                                   |
 | Wallet navigateur sans connecteur | `src/context/WalletContext.tsx` — `window.ethereum`, `eth_requestAccounts`, `accountsChanged`, `chainChanged`, déconnexion et restauration sans popup |
 | WalletConnect v2 direct           | `EthereumProvider.init`, `showQrModal:false`, événement `display_uri`, QR généré avec `qrcode`, annulation de connexion                               |
@@ -98,7 +100,7 @@ npm run verify:chain
 ```
 
 - **Build** : vérification TypeScript et bundle de production.
-- **Tests** : Playwright lance un serveur temporaire sur `127.0.0.1:5174`. Sur ce PC, Microsoft Edge est utilisé. Pour un autre système, remplacer `channel: 'msedge'` dans `playwright.config.ts` et installer Chromium avec `npx playwright install chromium`. Couverture : connexion, changement/ajout réseau, événements wallet, inscription et progression, prix payable, refus de signature, reçu échoué, détails, NFT absent, galeries paginées et signature Meebits. Aucun compte réel n’est utilisé.
+- **Tests** : Playwright lance un serveur temporaire sur `127.0.0.1:5174`. Microsoft Edge est utilisé sous Windows et Chromium sur les autres systèmes. Installer Chromium avec `npx playwright install chromium` si nécessaire. Couverture : connexion, changement/ajout réseau, événements wallet, inscription, validation depuis l’accueil, prix payable relu avant l’achat, refus de signature, reçu échoué, détails, NFT absent, galeries paginées et autorisation des signatures Meebits. Aucun compte réel n’est utilisé.
 - **Vérification chaîne** : lecture seule du réseau, code des six contrats, nom/quantité/prix, inscription et solde du compte, collection liée au claimer et autorisation de la première signature. Ce script n’envoie aucune transaction et ne nécessite pas de clé privée.
 
 ### Dépendances WalletConnect
@@ -109,6 +111,6 @@ La dApp n’utilise ni wagmi, RainbowKit, Web3Modal ni connecteur AppKit. La ver
 
 ## Rendre le TD
 
-Partager le d?p?t https://github.com/nielslecodeur/erc721-UX au professeur. Pour poursuivre le travail depuis un clone, renseigner `.env.local` puis utiliser les commandes de d?marrage du README principal.
+Partager le dépôt https://github.com/nielslecodeur/erc721-UX au professeur. Pour poursuivre le travail depuis un clone, renseigner `.env.local` puis utiliser les commandes de démarrage du README principal.
 
-Pour d?ployer sur un h?bergeur statique : `npm run build`, publier `dist`, et configurer la r??criture de toutes les routes vers `index.html` pour React Router. Ne pas utiliser `vite preview` comme serveur de production.
+Pour déployer sur un hébergeur statique : `npm run build`, publier `dist`, et configurer la réécriture de toutes les routes vers `index.html` pour React Router. Ne pas utiliser `vite preview` comme serveur de production.

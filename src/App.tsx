@@ -31,16 +31,15 @@ import { Collection, Gallery, Meebits, TokenDetail } from "./pages/Collections";
 import "./App.css";
 
 const navigation = [
-  { path: "/", label: "Mon TD", icon: "grid" as const },
+  { path: "/", label: "Mon TD" },
   {
     path: "/chain-info",
     label: "Connexion au réseau",
-    icon: "network" as const,
   },
-  { path: "/fakeBayc", label: "FakeBAYC", number: "1" },
-  { path: "/fakeNefturians", label: "FakeNefturians", number: "2" },
-  { path: "/fakeMeebits", label: "FakeMeebits", number: "3" },
-  { path: "/configuration", label: "Configuration", icon: "settings" as const },
+  { path: "/fakeBayc", label: "FakeBAYC" },
+  { path: "/fakeNefturians", label: "FakeNefturians" },
+  { path: "/fakeMeebits", label: "FakeMeebits" },
+  { path: "/configuration", label: "Configuration" },
 ];
 
 function Shell() {
@@ -73,53 +72,11 @@ function Shell() {
       <a className="skip-link" href="#main">
         Aller au contenu
       </a>
-      <aside className="sidebar">
-        <Link to="/" className="brand" aria-label="UX 721, accueil">
-          <span className="brand-mark">721</span>
-          <span>
-            UX <strong>721</strong>
-            <small>Le laboratoire NFT</small>
-          </span>
-        </Link>
-        <nav aria-label="Navigation du TD">
-          {navigation.map((item) => (
-            <NavLink key={item.path} to={item.path} end={item.path === "/"}>
-              {"icon" in item && item.icon ? (
-                <Icon name={item.icon} size={19} />
-              ) : (
-                <span className="nav-number">{item.number}</span>
-              )}
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </nav>
-        <div className="sidebar-foot">
-          <span>Blockchain 101</span>
-          <a
-            href="https://github.com/Elli610/Blockchain-101/tree/main/workshops/solidity/erc721-ux-101"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Consignes du TD
-            <Icon name="external" size={14} />
-          </a>
-          <button
-            className="theme-toggle"
-            onClick={() => setDark((value) => !value)}
-            aria-label={
-              dark ? "Activer le thème clair" : "Activer le thème sombre"
-            }
-          >
-            <Icon name={dark ? "sun" : "moon"} size={18} />
-            {dark ? "Thème clair" : "Thème sombre"}
-          </button>
-        </div>
-      </aside>
       <div className="main-shell">
         <header className="topbar">
-          <div className="breadcrumb">
-            ERC721 UX 101<span>/ Atelier pratique</span>
-          </div>
+          <Link to="/" className="brand" aria-label="UX 721, accueil">
+            ERC721 <strong>UX</strong>
+          </Link>
           <div className="topbar-actions">
             <span
               className={`network-tag ${wallet.address && wallet.chainId !== sepolia.id ? "wrong" : ""}`}
@@ -130,8 +87,24 @@ function Shell() {
                 : "Sepolia"}
             </span>
             <WalletControls compact />
+            <button
+              className="theme-toggle"
+              onClick={() => setDark((value) => !value)}
+              aria-label={
+                dark ? "Activer le thème clair" : "Activer le thème sombre"
+              }
+            >
+              <Icon name={dark ? "sun" : "moon"} size={18} />
+            </button>
           </div>
         </header>
+        <nav aria-label="Navigation du TD">
+          {navigation.map((item) => (
+            <NavLink key={item.path} to={item.path} end={item.path === "/"}>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
         <main id="main" tabIndex={-1}>
           {wallet.error && <Notice tone="error">{wallet.error}</Notice>}
           <PairingPanel />
@@ -147,7 +120,13 @@ function Shell() {
           <TransactionFeed />
         </main>
         <footer className="main-footer">
-          <span>Fait pour apprendre. Sur Sepolia.</span>
+          <a
+            href="https://github.com/Elli610/Blockchain-101/tree/main/workshops/solidity/erc721-ux-101"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Consignes du TD
+          </a>
           <a
             href="https://sepolia.etherscan.io"
             target="_blank"
@@ -166,8 +145,8 @@ function Configuration() {
   return (
     <>
       <PageTitle
-        title="Prêt pour la suite."
-        description="Les services à configurer et les derniers éléments à préparer avant de rendre ton TD."
+        title="Configuration"
+        description="Renseigne les services utilisés par ton wallet et prépare le rendu du TD."
       />
       <section className="panel">
         <h2>Configurer les services</h2>

@@ -57,6 +57,8 @@ interface State {
   galleryBalance: bigint;
   receiptStatus: string;
   networkFailure: boolean;
+  authorizedSigner: boolean;
+  tokenPrice: bigint;
   lastSimulation?: { to: string; data: Hex };
 }
 
@@ -76,6 +78,8 @@ async function setup(
     galleryBalance: 0n,
     receiptStatus: "0x1",
     networkFailure: false,
+    authorizedSigner: true,
+    tokenPrice: 1500000000000000n,
   };
   await page.addInitScript(
     ({ chain, reject, fallback, student, txHash, noWallet }) => {
@@ -191,7 +195,9 @@ async function setup(
       case "tokenCounter":
         return encode(14n);
       case "tokenPrice":
-        return encode(1500000000000000n);
+        return encode(state.tokenPrice);
+      case "whitelist":
+        return encode(state.authorizedSigner);
       case "decimals":
         return encode(18);
       case "hasSubmitted":
@@ -374,7 +380,7 @@ test("déconnecté : navigation, erreur sans wallet, configuration et responsive
   await setup(page, { noWallet: true });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Ton premier parcours NFT.",
+    "ERC721 UX 101",
   );
   await page
     .getByRole("button", { name: "Connecter mon wallet", exact: true })
@@ -643,4 +649,69 @@ test("le SDK WalletConnect direct se charge dans le navigateur sans AppKit", asy
   });
   expect(initialized).toBe("function");
   expect(errors).toEqual([]);
+});
+
+test("accueil : validation directe d’un NFT deja possede", async ({ page }) => {
+  const state = await setup(page);
+  state.registered = true;
+  state.progress[0] = true;
+  state.held[0] = 1n;
+  await page.goto("/");
+  await connect(page);
+  await page
+    .getByRole("button", { name: "Valider · 2 points", exact: true })
+    .click();
+  await expect(page.getByText("4 / 8", { exact: true })).toBeVisible();
+  expect(state.progress[1]).toBe(true);
+});
+
+test("achat : relire le prix avant la simulation si la valeur affichee a change", async ({
+  page,
+}) => {
+  const state = await setup(page);
+  await page.goto("/");
+  await connect(page);
+  await page
+    .getByRole("navigation")
+    .getByRole("link", { name: "FakeNefturians" })
+    .click();
+  const buy = page.getByRole("button", {
+    name: "Acheter · 0.0015 ETH",
+    exact: true,
+  });
+  await expect(buy).toBeVisible();
+  state.tokenPrice = 2000000000000000n;
+  await buy.click();
+  await expect(
+    page.getByText("Transaction confirmée", { exact: false }),
+  ).toBeVisible();
+  const sent = await page.evaluate(
+    () => (window as unknown as { __sent: { value: string }[] }).__sent,
+  );
+  expect(BigInt(sent[0].value)).toBe(state.tokenPrice);
+});
+
+test("Meebits : bloquer une signature non autorisee puis permettre de reverifier", async ({
+  page,
+}) => {
+  const state = await setup(page);
+  state.authorizedSigner = false;
+  await page.goto("/");
+  await connect(page);
+  await page
+    .getByRole("navigation")
+    .getByRole("link", { name: "FakeMeebits" })
+    .click();
+  await expect(page.getByRole("alert")).toContainText(
+    "signature n’est pas autorisée",
+  );
+  await expect(
+    page.getByRole("button", { name: "Réclamer le Meebit", exact: true }),
+  ).toBeDisabled();
+  state.authorizedSigner = true;
+  await page.getByRole("button", { name: "Actualiser", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Réclamer le Meebit", exact: true }),
+  ).toBeEnabled();
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });
